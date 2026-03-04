@@ -83,19 +83,24 @@ export default async function Page({
     blogPost: filteredPosts.slice(0, 10).map((post) => {
       const blogPost: any = {
         "@type": "BlogPosting",
-        headline: post.data?.title,
-        description: post.data?.description,
+        headline: post.data?.title || "Untitled",
+        description: post.data?.description || "",
         url: `${siteConfig.url}${post.url}`,
-        author: {
-          "@type": "Person",
-          name: post.data?.author,
-          url: siteConfig.links?.twitter,
-        },
         publisher: {
           "@type": "Organization",
           name: siteConfig.name,
           url: siteConfig.url,
         },
+      }
+
+      if (post.data?.author) {
+        blogPost.author = {
+          "@type": "Person",
+          name: post.data.author,
+        }
+        if (siteConfig.links?.twitter) {
+          blogPost.author.url = siteConfig.links.twitter
+        }
       }
 
       if (post.data?.publishedOn) {
