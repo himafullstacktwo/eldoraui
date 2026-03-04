@@ -49,7 +49,7 @@ export async function StarsCount() {
     )
     const json = await data.json()
 
-    if (!data.ok || !json.stargazers_count) {
+    if (!data.ok || typeof json.stargazers_count !== "number") {
       return null
     }
 
