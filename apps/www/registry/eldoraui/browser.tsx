@@ -386,10 +386,16 @@ export function Browser({
             <Volume2 className="h-4 w-4" />
             <Battery className="h-4 w-4" />
             <span>
-              {new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {(() => {
+                try {
+                  return new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                } catch {
+                  return "--:--"
+                }
+              })()}
             </span>
           </div>
 
@@ -643,7 +649,15 @@ export function Browser({
                       {item.url}
                     </div>
                     <div className="text-muted-foreground text-xs">
-                      {item.timestamp.toLocaleTimeString()}
+                      {(() => {
+                        try {
+                          return item.timestamp && item.timestamp.toLocaleTimeString
+                            ? item.timestamp.toLocaleTimeString()
+                            : "--:--"
+                        } catch {
+                          return "--:--"
+                        }
+                      })()}
                     </div>
                   </div>
                 </div>

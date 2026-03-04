@@ -44,13 +44,27 @@ export const capitalize = (str: string, lower = false) =>
     match.toUpperCase()
   )
 
-export function formatDate(input: string | number): string {
+export function formatDate(input: string | number | undefined | null): string {
+  if (!input) return ""
+  
   const date = new Date(input)
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  })
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    console.warn("[v0] Invalid date input:", input)
+    return ""
+  }
+  
+  try {
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
+  } catch (error) {
+    console.warn("[v0] Error formatting date:", error)
+    return ""
+  }
 }
 
 export const calculateReadingTime = (content: string): number => {

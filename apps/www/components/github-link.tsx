@@ -41,12 +41,18 @@ export function GitHubLink({ className }: { className?: string }) {
 
 export async function StarsCount() {
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    
     const data = await fetch(
       "https://api.github.com/repos/karthikmudunuri/eldoraui",
       {
         next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
+        signal: controller.signal,
       }
     )
+
+    clearTimeout(timeoutId)
 
     if (!data.ok) {
       return null
@@ -64,10 +70,13 @@ export async function StarsCount() {
       return null
     }
 
-    const formattedCount = count.toLocaleString("en-US", {
+    // Safe formatting - use Intl instead of toLocaleString to be more explicit
+    const formatter = new Intl.NumberFormat("en-US", {
       useGrouping: true,
       maximumFractionDigits: 0,
     })
+    
+    const formattedCount = formatter.format(count)
 
     return (
       <span className="text-muted-foreground w-8 text-xs tabular-nums">
@@ -82,6 +91,7 @@ export async function StarsCount() {
       </span>
     )
   } catch (error) {
+    console.error("[v0] StarsCount fetch failed:", error)
     return null
   }
 }

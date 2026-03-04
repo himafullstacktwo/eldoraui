@@ -63,8 +63,16 @@ export default async function Page({
     })),
   }
 
+  // Validate date helper
+  const validateDate = (dateInput: any): string | undefined => {
+    if (!dateInput) return undefined
+    const date = new Date(dateInput)
+    if (isNaN(date.getTime())) return undefined
+    return date.toISOString()
+  }
+
   // Generate structured data
-  const structuredData: WithContext<Blog> = {
+  const structuredData: any = {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: `${siteConfig.name} Blog`,
@@ -103,9 +111,10 @@ export default async function Page({
         }
       }
 
-      if (post.data?.publishedOn) {
-        blogPost.datePublished = post.data.publishedOn
-        blogPost.dateModified = post.data.publishedOn
+      const publishedDate = validateDate(post.data?.publishedOn)
+      if (publishedDate) {
+        blogPost.datePublished = publishedDate
+        blogPost.dateModified = publishedDate
       }
 
       if (post.data?.image) {

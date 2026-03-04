@@ -103,21 +103,27 @@ export default async function BlogPage({ params }: PageProps) {
     { name: doc.title, url: page.url },
   ] as const
 
+  // Validate published date
+  const validateDate = (dateInput: any): string | undefined => {
+    if (!dateInput) return undefined
+    const date = new Date(dateInput)
+    if (isNaN(date.getTime())) return undefined
+    return date.toISOString()
+  }
+
+  const publishedDate = validateDate(doc.publishedOn)
+
   // Generate structured data for individual blog post
-  const structuredData: WithContext<BlogPosting> = {
+  const structuredData: any = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    headline: doc.title,
-    description: doc.description,
+    headline: doc.title || "Untitled",
+    description: doc.description || "",
     url: absoluteUrl(page.url),
-    datePublished: doc.publishedOn,
-    dateModified: doc.publishedOn,
     author: {
       "@type": "Person",
       name: doc.author || "Eldora UI Team",
-      url: siteConfig.links?.twitter,
     },
-    image: doc.image ? [doc.image] : undefined,
     publisher: {
       "@type": "Organization",
       name: siteConfig.name,
@@ -133,12 +139,29 @@ export default async function BlogPage({ params }: PageProps) {
     },
     wordCount: content ? content.split(/\s+/).length : 0,
     timeRequired: `PT${calculateReadingTime(content || "")}M`,
-    keywords: (() => {
-      const docTag = doc.tags
-      if (!docTag) return undefined
-      return Array.isArray(docTag) ? docTag : [docTag]
-    })(),
     inLanguage: "en-US",
+  }
+
+  // Only add optional fields if they have valid values
+  if (publishedDate) {
+    structuredData.datePublished = publishedDate
+    structuredData.dateModified = publishedDate
+  }
+
+  if (doc.image) {
+    structuredData.image = [doc.image]
+  }
+
+  if (siteConfig.links?.twitter) {
+    structuredData.author.url = siteConfig.links.twitter
+  }
+
+  const docTag = doc.tags
+  if (docTag) {
+    const tags = Array.isArray(docTag) ? docTag : [docTag]
+    if (tags.length > 0) {
+      structuredData.keywords = tags
+    }
   }
 
   const breadcrumbStructuredData: WithContext<BreadcrumbList> = {
