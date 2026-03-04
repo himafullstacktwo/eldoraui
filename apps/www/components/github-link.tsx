@@ -47,23 +47,37 @@ export async function StarsCount() {
         next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
       }
     )
-    const json = await data.json()
 
-    if (!data.ok || typeof json.stargazers_count !== "number") {
+    if (!data.ok) {
       return null
     }
 
-    const count = json.stargazers_count
+    const json = await data.json()
+
+    if (!json || typeof json.stargazers_count !== "number" || json.stargazers_count < 0) {
+      return null
+    }
+
+    const count = Number(json.stargazers_count)
+
+    if (!Number.isFinite(count)) {
+      return null
+    }
+
+    const formattedCount = count.toLocaleString("en-US", {
+      useGrouping: true,
+      maximumFractionDigits: 0,
+    })
 
     return (
       <span className="text-muted-foreground w-8 text-xs tabular-nums">
         <span className="hidden sm:inline">
-          {count.toLocaleString()}
+          {formattedCount}
         </span>
         <span className="sm:hidden">
           {count >= 1000
             ? `${(count / 1000).toFixed(1)}k`
-            : count.toLocaleString()}
+            : formattedCount}
         </span>
       </span>
     )
