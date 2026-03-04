@@ -97,8 +97,14 @@ export default function CommitList({
 }) {
   const [loading, setLoading] = useState(false)
   const [commits, setCommits] = useState<Commit[]>([])
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
     const loadCommits = async () => {
       setLoading(true)
       try {
@@ -139,7 +145,7 @@ export default function CommitList({
   // Group commits by month and category
   const groupedCommits = groupCommitsByMonth(commits)
 
-  if (loading) {
+  if (!isMounted || loading) {
     return (
       <div className="flex items-center justify-center py-8">
         <Badge variant="secondary">Loading commits...</Badge>
