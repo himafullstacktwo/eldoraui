@@ -40,24 +40,34 @@ export function GitHubLink({ className }: { className?: string }) {
 }
 
 export async function StarsCount() {
-  const data = await fetch(
-    "https://api.github.com/repos/karthikmudunuri/eldoraui",
-    {
-      next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
-    }
-  )
-  const json = await data.json()
+  try {
+    const data = await fetch(
+      "https://api.github.com/repos/karthikmudunuri/eldoraui",
+      {
+        next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
+      }
+    )
+    const json = await data.json()
 
-  return (
-    <span className="text-muted-foreground w-8 text-xs tabular-nums">
-      <span className="hidden sm:inline">
-        {json.stargazers_count.toLocaleString()}
+    if (!data.ok || !json.stargazers_count) {
+      return null
+    }
+
+    const count = json.stargazers_count
+
+    return (
+      <span className="text-muted-foreground w-8 text-xs tabular-nums">
+        <span className="hidden sm:inline">
+          {count.toLocaleString()}
+        </span>
+        <span className="sm:hidden">
+          {count >= 1000
+            ? `${(count / 1000).toFixed(1)}k`
+            : count.toLocaleString()}
+        </span>
       </span>
-      <span className="sm:hidden">
-        {json.stargazers_count >= 1000
-          ? `${(json.stargazers_count / 1000).toFixed(1)}k`
-          : json.stargazers_count.toLocaleString()}
-      </span>
-    </span>
-  )
+    )
+  } catch (error) {
+    return null
+  }
 }
