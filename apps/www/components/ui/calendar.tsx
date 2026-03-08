@@ -37,15 +37,11 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) => {
-          try {
-            if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-              return "--"
-            }
-            return date.toLocaleString("default", { month: "short" })
-          } catch (error) {
-            console.error("[v0] Calendar formatMonthDropdown error:", error)
+          if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
             return "--"
           }
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+          return months[date.getMonth()] || "--"
         },
         ...formatters,
       }}
@@ -195,15 +191,13 @@ function CalendarDayButton({
   }, [modifiers.focused])
 
   const safeDateString = (() => {
-    try {
-      if (!day?.date || !(day.date instanceof Date) || isNaN(day.date.getTime())) {
-        return "invalid"
-      }
-      return day.date.toLocaleDateString()
-    } catch (error) {
-      console.error("[v0] CalendarDayButton date error:", error)
+    if (!day?.date || !(day.date instanceof Date) || isNaN(day.date.getTime())) {
       return "invalid"
     }
+    const year = day.date.getFullYear()
+    const month = String(day.date.getMonth() + 1).padStart(2, "0")
+    const date = String(day.date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${date}`
   })()
 
   return (
