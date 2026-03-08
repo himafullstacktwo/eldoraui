@@ -387,10 +387,14 @@ export function Browser({
             <Battery className="h-4 w-4" />
             <span>
               {(() => {
-                const now = new Date()
-                const hours = String(now.getHours()).padStart(2, "0")
-                const minutes = String(now.getMinutes()).padStart(2, "0")
-                return `${hours}:${minutes}`
+                try {
+                  return new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                } catch {
+                  return "--:--"
+                }
               })()}
             </span>
           </div>
@@ -646,12 +650,13 @@ export function Browser({
                     </div>
                     <div className="text-muted-foreground text-xs">
                       {(() => {
-                        if (!item?.timestamp || !(item.timestamp instanceof Date)) {
+                        try {
+                          return item.timestamp && item.timestamp.toLocaleTimeString
+                            ? item.timestamp.toLocaleTimeString()
+                            : "--:--"
+                        } catch {
                           return "--:--"
                         }
-                        const hours = String(item.timestamp.getHours()).padStart(2, "0")
-                        const minutes = String(item.timestamp.getMinutes()).padStart(2, "0")
-                        return `${hours}:${minutes}`
                       })()}
                     </div>
                   </div>

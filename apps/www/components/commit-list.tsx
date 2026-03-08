@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { format } from "date-fns"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -73,9 +74,13 @@ const groupCommitsByMonth = (commits: Commit[]): GroupedCommits => {
         return
       }
 
-      // Format date manually without date-fns to avoid locale issues
-      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-      const monthYear = `${months[date.getMonth()]} ${date.getFullYear()}`
+      let monthYear: string
+      try {
+        monthYear = format(date, "MMMM yyyy")
+      } catch (error) {
+        console.error("[v0] Error formatting date:", error)
+        return
+      }
 
       const type = getCommitType(commit.commit.message)
 
