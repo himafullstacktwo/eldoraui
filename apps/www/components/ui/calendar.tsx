@@ -36,8 +36,17 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+        formatMonthDropdown: (date) => {
+          try {
+            if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+              return "--"
+            }
+            return date.toLocaleString("default", { month: "short" })
+          } catch (error) {
+            console.error("[v0] Calendar formatMonthDropdown error:", error)
+            return "--"
+          }
+        },
         ...formatters,
       }}
       classNames={{
@@ -185,12 +194,24 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
+  const safeDateString = (() => {
+    try {
+      if (!day?.date || !(day.date instanceof Date) || isNaN(day.date.getTime())) {
+        return "invalid"
+      }
+      return day.date.toLocaleDateString()
+    } catch (error) {
+      console.error("[v0] CalendarDayButton date error:", error)
+      return "invalid"
+    }
+  })()
+
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={safeDateString}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
