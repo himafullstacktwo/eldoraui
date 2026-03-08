@@ -61,27 +61,50 @@ const groupCommitsByMonth = (commits: Commit[]): GroupedCommits => {
   const grouped: GroupedCommits = {}
 
   commits.forEach((commit) => {
-    const date = new Date(commit.commit.author.date)
-    const monthYear = format(date, "MMMM yyyy")
-    const type = getCommitType(commit.commit.message)
-
-    if (!grouped[monthYear]) {
-      grouped[monthYear] = {}
-    }
-
-    // Only include commits with recognized types
-    if (type) {
-      const categoryName = getCategoryName(type)
-      if (!grouped[monthYear][categoryName]) {
-        grouped[monthYear][categoryName] = []
+    try {
+      // Validate date before using it
+      if (!commit?.commit?.author?.date) {
+        return
       }
 
-      grouped[monthYear][categoryName].push({
-        message: commit.commit.message,
-        date: commit.commit.author.date,
-        url: commit.html_url,
-        sha: commit.sha,
-      })
+      const date = new Date(commit.commit.author.date)
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return
+      }
+
+      let monthYear: string
+      try {
+        monthYear = format(date, "MMMM yyyy")
+      } catch (error) {
+        console.error("[v0] Error formatting date:", error)
+        return
+      }
+
+      const type = getCommitType(commit.commit.message)
+
+      if (!grouped[monthYear]) {
+        grouped[monthYear] = {}
+      }
+
+      // Only include commits with recognized types
+      if (type) {
+        const categoryName = getCategoryName(type)
+        if (!grouped[monthYear][categoryName]) {
+          grouped[monthYear][categoryName] = []
+        }
+
+        grouped[monthYear][categoryName].push({
+          message: commit.commit.message,
+          date: commit.commit.author.date,
+          url: commit.html_url,
+          sha: commit.sha,
+        })
+      }
+    } catch (error) {
+      console.error("[v0] Error processing commit:", error)
+      return
     }
   })
 
