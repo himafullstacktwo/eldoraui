@@ -51,20 +51,16 @@ export function formatDate(input: string | number | undefined | null): string {
   
   // Check if date is valid
   if (isNaN(date.getTime())) {
-    console.warn("[v0] Invalid date input:", input)
     return ""
   }
   
-  try {
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  } catch (error) {
-    console.warn("[v0] Error formatting date:", error)
-    return ""
-  }
+  // Manual date formatting to avoid locale issues during prerendering
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+  const month = months[date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+  
+  return `${month} ${day}, ${year}`
 }
 
 export const calculateReadingTime = (content: string): number => {
